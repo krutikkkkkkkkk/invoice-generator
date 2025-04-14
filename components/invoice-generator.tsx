@@ -19,6 +19,7 @@ export function InvoiceGenerator() {
     invoiceNumber: "",
     date: new Date(),
     dueDate: new Date(),
+    currency: "USD", // 🆕 Added currency here
     company: {
       name: "",
       address: "",
@@ -118,7 +119,11 @@ export function InvoiceGenerator() {
       </div>
 
       {mode === "edit" ? (
-        <InvoiceForm documentType={documentType} invoiceData={invoiceData} setInvoiceData={setInvoiceData} />
+        <InvoiceForm
+          documentType={documentType}
+          invoiceData={invoiceData}
+          setInvoiceData={setInvoiceData}
+        />
       ) : (
         <div>
           <div className="mb-6">
@@ -132,4 +137,3 @@ export function InvoiceGenerator() {
     </div>
   )
 }
-

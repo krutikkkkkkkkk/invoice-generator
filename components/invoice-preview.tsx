@@ -1,17 +1,27 @@
 import { format } from "date-fns"
 import type { InvoiceData } from "@/types/invoice"
+import {QRCodeSVG} from "qrcode.react"
+
 
 interface InvoicePreviewProps {
   invoiceData: InvoiceData
 }
 
 export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
+  const currencyFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: invoiceData.currency || "USD",
+  })
+
   const calculateSubtotal = () => {
     return invoiceData.items.reduce((sum, item) => sum + item.quantity * item.price, 0)
   }
 
   const calculateTaxTotal = () => {
-    return invoiceData.items.reduce((sum, item) => sum + item.quantity * item.price * (item.tax / 100), 0)
+    return invoiceData.items.reduce(
+      (sum, item) => sum + item.quantity * item.price * (item.tax / 100),
+      0
+    )
   }
 
   const calculateTotal = () => {
@@ -29,7 +39,9 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
           <h1 className="text-3xl font-bold uppercase">
             {invoiceData.documentType === "invoice" ? "INVOICE" : "QUOTATION"}
           </h1>
-          {invoiceData.invoiceNumber && <p className="text-gray-600">#{invoiceData.invoiceNumber}</p>}
+          {invoiceData.invoiceNumber && (
+            <p className="text-gray-600">#{invoiceData.invoiceNumber}</p>
+          )}
         </div>
         <div className="text-right">
           <p className="font-bold">{invoiceData.company.name}</p>
@@ -83,9 +95,13 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
               <tr key={item.id} className="border-b border-gray-200">
                 <td className="py-2">{item.description}</td>
                 <td className="py-2 text-right">{item.quantity}</td>
-                <td className="py-2 text-right">${item.price.toFixed(2)}</td>
+                <td className="py-2 text-right">
+                  {currencyFormatter.format(item.price)}
+                </td>
                 <td className="py-2 text-right">{item.tax}%</td>
-                <td className="py-2 text-right">${calculateItemTotal(item.quantity, item.price).toFixed(2)}</td>
+                <td className="py-2 text-right">
+                  {currencyFormatter.format(calculateItemTotal(item.quantity, item.price))}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -96,15 +112,15 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
         <div className="w-64">
           <div className="flex justify-between border-b border-gray-200 py-2">
             <span>Subtotal:</span>
-            <span>${calculateSubtotal().toFixed(2)}</span>
+            <span>{currencyFormatter.format(calculateSubtotal())}</span>
           </div>
           <div className="flex justify-between border-b border-gray-200 py-2">
             <span>Tax:</span>
-            <span>${calculateTaxTotal().toFixed(2)}</span>
+            <span>{currencyFormatter.format(calculateTaxTotal())}</span>
           </div>
           <div className="flex justify-between py-2 text-lg font-bold">
             <span>Total:</span>
-            <span>${calculateTotal().toFixed(2)}</span>
+            <span>{currencyFormatter.format(calculateTotal())}</span>
           </div>
         </div>
       </div>
@@ -125,7 +141,49 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
           )}
         </div>
       )}
+      {(invoiceData.banking || invoiceData.paymentOptions) && (
+  <div className="mb-8">
+    <h2 className="mb-2 text-lg font-semibold">Payment Information</h2>
+
+    {invoiceData.banking && (
+      <div className="mb-4 text-sm text-gray-700">
+        <p><strong>Bank:</strong> {invoiceData.banking.bankName}</p>
+        <p><strong>Account Name:</strong> {invoiceData.banking.accountName}</p>
+        <p><strong>Account Number:</strong> {invoiceData.banking.accountNumber}</p>
+        {invoiceData.banking.ifscCode && <p><strong>IFSC:</strong> {invoiceData.banking.ifscCode}</p>}
+        {invoiceData.banking.swiftCode && <p><strong>SWIFT:</strong> {invoiceData.banking.swiftCode}</p>}
+      </div>
+    )}
+
+    {invoiceData.paymentOptions?.paypalEmail && (
+      <p className="mb-2 text-sm text-gray-700">
+        <strong>PayPal:</strong> {invoiceData.paymentOptions.paypalEmail}
+      </p>
+    )}
+
+{invoiceData.currency === "INR" && invoiceData.company.upiId && (
+  <div className="mt-8 flex flex-col items-center">
+    <h2 className="mb-2 text-lg font-semibold">Pay via UPI</h2>
+    <QRCodeSVG
+      value={`upi://pay?pa=${invoiceData.company.upiId || ""}&pn=${encodeURIComponent(
+        invoiceData.company.name || ""
+      )}&am=${calculateTotal().toFixed(2)}&cu=INR`}
+      size={160}
+      includeMargin={true}
+    />
+    <p className="mt-2 text-sm text-gray-600">{invoiceData.company.upiId}</p>
+  </div>
+)}
+
+
+  </div>
+)}
+   
+      <div className="text-center text-sm text-gray-500 mt-4">
+        <p>This invoice have been digitally signed by {invoiceData.company.name} and is valid without a signature.</p>
+        <p>For any queries, please contact us at {invoiceData.company.email}</p>
+        <p>Generated on {format(new Date(), "MMMM dd, yyyy")}</p>
+      </div>
     </div>
   )
 }
-
