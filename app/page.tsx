@@ -7,7 +7,7 @@ export default function Home() {
     <>
       <main className="min-h-screen bg-gray-50 p-4 md:p-8">
         <div className="mx-auto max-w-7xl">
-          <header className="relative mb-8 text-left border-gray-400 border-2 rounded-lg p-6 bg-white shadow-sm">
+          <header className="relative mb-8 text-left border-gray-200 border-2 rounded-lg p-6 bg-white shadow-sm">
             <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
               💸 Invoice & Quotation Generator
             </h1>
