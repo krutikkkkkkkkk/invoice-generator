@@ -30,6 +30,7 @@ export type InvoiceData = {
     city: string
     state: string
     zip: string
+    country: string
     phone: string
     email: string
     upiId?: string; // ✅ Add this
@@ -41,6 +42,7 @@ export type InvoiceData = {
     city: string
     state: string
     zip: string
+    country: string
     phone: string
     email: string
   }

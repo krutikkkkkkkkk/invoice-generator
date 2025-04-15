@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation" // 🆕 Import for reading query parameters
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InvoiceForm } from "@/components/invoice-form"
 import { InvoicePreview } from "@/components/invoice-preview"
@@ -12,6 +13,7 @@ import type { DocumentType, InvoiceData } from "@/types/invoice"
 
 export function InvoiceGenerator() {
   const { toast } = useToast()
+  const searchParams = useSearchParams() // 🆕 Initialize searchParams
   const [mode, setMode] = useState<"edit" | "preview">("edit")
   const [documentType, setDocumentType] = useState<DocumentType>("invoice")
   const [invoiceData, setInvoiceData] = useState<InvoiceData>({
@@ -19,15 +21,17 @@ export function InvoiceGenerator() {
     invoiceNumber: "",
     date: new Date(),
     dueDate: new Date(),
-    currency: "USD", // 🆕 Added currency here
+    currency: "USD",
     company: {
       name: "",
       address: "",
       city: "",
       state: "",
       zip: "",
+      country: "", // 🆕 Added country
       phone: "",
       email: "",
+      upiId: "", // 🆕 Added UPI ID
     },
     client: {
       name: "",
@@ -35,6 +39,7 @@ export function InvoiceGenerator() {
       city: "",
       state: "",
       zip: "",
+      country: "", // 🆕 Added country
       phone: "",
       email: "",
     },
@@ -50,7 +55,49 @@ export function InvoiceGenerator() {
     notes: "",
     terms: "",
     taxRate: 0,
+    paymentOptions: {
+      paypalEmail: "", // 🆕 Added PayPal email
+    },
   })
+
+  // 🆕 Prefill company information from query parameters
+  useEffect(() => {
+    const companyName = searchParams.get("companyName")
+    const companyAddress = searchParams.get("companyAddress")
+    const companyCity = searchParams.get("companyCity")
+    const companyState = searchParams.get("companyState")
+    const companyZip = searchParams.get("companyZip")
+    const companyCountry = searchParams.get("companyCountry") // 🆕 Added companyCountry
+    const companyPhone = searchParams.get("companyPhone")
+    const companyEmail = searchParams.get("companyEmail")
+    const paypalEmail = searchParams.get("paypalEmail") // 🆕 Added PayPal email
+    const upiId = searchParams.get("upiId") // 🆕 Added UPI ID
+
+    if (
+      companyName || companyAddress || companyCity || companyState || 
+      companyZip || companyCountry || companyPhone || companyEmail || 
+      paypalEmail || upiId
+    ) {
+      setInvoiceData((prev) => ({
+        ...prev,
+        company: {
+          name: companyName || prev.company.name,
+          address: companyAddress || prev.company.address,
+          city: companyCity || prev.company.city,
+          state: companyState || prev.company.state,
+          zip: companyZip || prev.company.zip,
+          country: companyCountry || prev.company.country, // 🆕 Prefill country
+          phone: companyPhone || prev.company.phone,
+          email: companyEmail || prev.company.email,
+          upiId: upiId || prev.company.upiId, // 🆕 Prefill UPI ID
+        },
+        paymentOptions: {
+          ...prev.paymentOptions,
+          paypalEmail: paypalEmail || prev.paymentOptions?.paypalEmail, // 🆕 Prefill PayPal email
+        },
+      }))
+    }
+  }, [searchParams])
 
   const handleDownload = async () => {
     const element = document.getElementById("invoice-preview")

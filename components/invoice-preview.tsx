@@ -49,6 +49,7 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
           <p>
             {invoiceData.company.city}, {invoiceData.company.state} {invoiceData.company.zip}
           </p>
+          <p>{invoiceData.company.country}</p>
           <p>{invoiceData.company.phone}</p>
           <p>{invoiceData.company.email}</p>
         </div>
@@ -62,6 +63,7 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
           <p>
             {invoiceData.client.city}, {invoiceData.client.state} {invoiceData.client.zip}
           </p>
+          <p>{invoiceData.client.country}</p>
           <p>{invoiceData.client.phone}</p>
           <p>{invoiceData.client.email}</p>
         </div>

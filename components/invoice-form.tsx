@@ -265,6 +265,14 @@ export function InvoiceForm({ documentType, invoiceData, setInvoiceData }: Invoi
                       onChange={(e) => updateCompany("email", e.target.value)}
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="company-country">Company Country</Label>
+                    <Input
+                      id="company-country"
+                      value={invoiceData.company.country}
+                      onChange={(e) => updateCompany("country", e.target.value)}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -333,6 +341,14 @@ export function InvoiceForm({ documentType, invoiceData, setInvoiceData }: Invoi
                   id="clientZip"
                   value={invoiceData.client.zip}
                   onChange={(e) => updateClient("zip", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="client-country">Client Country</Label>
+                <Input
+                  id="client-country"
+                  value={invoiceData.client.country}
+                  onChange={(e) => updateClient("country", e.target.value)}
                 />
               </div>
             </div>
