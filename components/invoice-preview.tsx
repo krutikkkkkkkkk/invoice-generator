@@ -181,10 +181,20 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
   </div>
 )}
    
-      <div className="text-center text-sm text-gray-500 mt-4">
-        <p>This invoice have been digitally signed by {invoiceData.company.name} and is valid without a signature.</p>
-        <p>For any queries, please contact us at {invoiceData.company.email}</p>
-        <p>Generated on {format(new Date(), "MMMM dd, yyyy")}</p>
+      <div className="text-start text-sm text-gray-500 mt-8 border-t border-gray-300 pt-4">
+        <p className="mb-2">
+          <strong>Digitally Signed:</strong> This document has been digitally signed by{" "}
+          <span className="font-medium">{invoiceData.company.name}</span> and is valid without a signature.
+        </p>
+        <p className="mb-2">
+          <strong>Contact Us:</strong> For any queries, please reach out at{" "}
+          <a href={`mailto:${invoiceData.company.email}`} className="text-blue-600 hover:underline">
+            {invoiceData.company.email}
+          </a>
+        </p>
+        <p>
+          <strong>Generated On:</strong> {format(new Date(), "MMMM dd, yyyy")}
+        </p>
       </div>
     </div>
   )
