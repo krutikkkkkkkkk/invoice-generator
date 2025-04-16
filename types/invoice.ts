@@ -34,6 +34,7 @@ export type InvoiceData = {
     phone: string
     email: string
     upiId?: string; // ✅ Add this
+    paypalEmail?: string
 
   }
   client: {

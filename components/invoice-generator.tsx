@@ -1,21 +1,25 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation" // 🆕 Import for reading query parameters
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { InvoiceForm } from "@/components/invoice-form"
-import { InvoicePreview } from "@/components/invoice-preview"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { jsPDF } from "jspdf"
-import html2canvas from "html2canvas"
-import type { DocumentType, InvoiceData } from "@/types/invoice"
+import { useEffect, useState } from "react";
+import companies from "@/data/companies.json";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InvoiceForm } from "@/components/invoice-form";
+import { InvoicePreview } from "@/components/invoice-preview";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+import type { DocumentType, InvoiceData } from "@/types/invoice";
 
-export function InvoiceGenerator() {
-  const { toast } = useToast()
-  const searchParams = useSearchParams() // 🆕 Initialize searchParams
-  const [mode, setMode] = useState<"edit" | "preview">("edit")
-  const [documentType, setDocumentType] = useState<DocumentType>("invoice")
+interface InvoiceGeneratorProps {
+  companyName: string; // Added companyName prop
+}
+
+export function InvoiceGenerator({ companyName }: InvoiceGeneratorProps) {
+  const { toast } = useToast();
+  const [companyData, setCompanyData] = useState<any>(null);
+  const [mode, setMode] = useState<"edit" | "preview">("edit");
+  const [documentType, setDocumentType] = useState<DocumentType>("invoice");
   const [invoiceData, setInvoiceData] = useState<InvoiceData>({
     documentType: "invoice",
     invoiceNumber: "",
@@ -28,10 +32,10 @@ export function InvoiceGenerator() {
       city: "",
       state: "",
       zip: "",
-      country: "", // 🆕 Added country
+      country: "",
       phone: "",
       email: "",
-      upiId: "", // 🆕 Added UPI ID
+      upiId: "",
     },
     client: {
       name: "",
@@ -39,7 +43,7 @@ export function InvoiceGenerator() {
       city: "",
       state: "",
       zip: "",
-      country: "", // 🆕 Added country
+      country: "",
       phone: "",
       email: "",
     },
@@ -56,98 +60,142 @@ export function InvoiceGenerator() {
     terms: "",
     taxRate: 0,
     paymentOptions: {
-      paypalEmail: "", // 🆕 Added PayPal email
+      paypalEmail: "",
     },
-  })
+    banking: {
+      accountName: "",
+      accountNumber: "",
+      bankName: "",
+      ifscCode: "",
+      swiftCode: "",
+    },
+  });
 
-  // 🆕 Prefill company information from query parameters
   useEffect(() => {
-    const companyName = searchParams.get("companyName")
-    const companyAddress = searchParams.get("companyAddress")
-    const companyCity = searchParams.get("companyCity")
-    const companyState = searchParams.get("companyState")
-    const companyZip = searchParams.get("companyZip")
-    const companyCountry = searchParams.get("companyCountry") // 🆕 Added companyCountry
-    const companyPhone = searchParams.get("companyPhone")
-    const companyEmail = searchParams.get("companyEmail")
-    const paypalEmail = searchParams.get("paypalEmail") // 🆕 Added PayPal email
-    const upiId = searchParams.get("upiId") // 🆕 Added UPI ID
-
-    if (
-      companyName || companyAddress || companyCity || companyState || 
-      companyZip || companyCountry || companyPhone || companyEmail || 
-      paypalEmail || upiId
-    ) {
+    if (companyName && companies[companyName as keyof typeof companies]) {
+      const companyInfo = companies[companyName as keyof typeof companies];
+      setCompanyData(companyInfo);
       setInvoiceData((prev) => ({
         ...prev,
         company: {
-          name: companyName || prev.company.name,
-          address: companyAddress || prev.company.address,
-          city: companyCity || prev.company.city,
-          state: companyState || prev.company.state,
-          zip: companyZip || prev.company.zip,
-          country: companyCountry || prev.company.country, // 🆕 Prefill country
-          phone: companyPhone || prev.company.phone,
-          email: companyEmail || prev.company.email,
-          upiId: upiId || prev.company.upiId, // 🆕 Prefill UPI ID
+          name: companyInfo.name || prev.company.name,
+          address: companyInfo.address || prev.company.address,
+          city: companyInfo.city || prev.company.city,
+          state: companyInfo.state || prev.company.state,
+          zip: companyInfo.zip || prev.company.zip,
+          country: companyInfo.country || prev.company.country,
+          phone: companyInfo.phone || prev.company.phone,
+          email: companyInfo.email || prev.company.email,
+          upiId: companyInfo.upiId || prev.company.upiId,
         },
         paymentOptions: {
           ...prev.paymentOptions,
-          paypalEmail: paypalEmail || prev.paymentOptions?.paypalEmail, // 🆕 Prefill PayPal email
+          paypalEmail: companyInfo.paypalEmail || prev.paymentOptions?.paypalEmail,
         },
-      }))
+      }));
+    } else {
+      setCompanyData(null);
     }
-  }, [searchParams])
+  }, [companyName]);
 
   const handleDownload = async () => {
-    const element = document.getElementById("invoice-preview")
-    if (!element) return
+    const element = document.getElementById("invoice-preview");
+    if (!element) return;
 
     try {
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 2, // Increase scale for better clarity
         useCORS: true,
         logging: false,
-      })
+      });
 
-      const imgData = canvas.toDataURL("image/png")
+      const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4",
-      })
+      });
 
-      const imgProps = pdf.getImageProperties(imgData)
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight() - 40; // Subtract 30mm for top and 30mm for bottom margins
 
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
-      pdf.save(`${documentType}-${invoiceData.invoiceNumber || "draft"}.pdf`)
+      // Convert canvas height to mm and apply zoom factor
+      const zoomFactor = 1.4; // Zoom factor for the image
+      const imgWidth = pdfWidth * zoomFactor;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const canvasHeightMm = (canvas.height * imgWidth) / canvas.width;
+
+      let yOffset = 0; // Start from the top of the content
+      while (yOffset < canvasHeightMm) {
+        // Calculate the visible height for the current page
+        const visibleHeightMm = Math.min(canvasHeightMm - yOffset, pdfHeight);
+
+        // Create a cropped canvas for the current page
+        const croppedCanvas = document.createElement("canvas");
+        croppedCanvas.width = canvas.width;
+        croppedCanvas.height = (visibleHeightMm * canvas.width) / imgWidth;
+
+        const croppedContext = croppedCanvas.getContext("2d");
+        if (croppedContext) {
+          croppedContext.drawImage(
+            canvas,
+            0,
+            (yOffset * canvas.width) / imgWidth, // Source Y position
+            canvas.width,
+            croppedCanvas.height, // Source height
+            0,
+            0,
+            canvas.width,
+            croppedCanvas.height // Destination height
+          );
+        }
+
+        const croppedImgData = croppedCanvas.toDataURL("image/png");
+
+        // Add the cropped image to the PDF
+        pdf.addImage(
+          croppedImgData,
+          "PNG",
+          (pdfWidth - imgWidth) / 2, // Center the image horizontally
+          30, // Start 30mm from the top of the page
+          imgWidth,
+          visibleHeightMm
+        );
+
+        yOffset += visibleHeightMm; // Move to the next section of the content
+
+        // Add a new page if there is more content
+        if (yOffset < canvasHeightMm) {
+          pdf.addPage();
+        }
+      }
+
+      pdf.save(`${documentType}-${invoiceData.invoiceNumber || "draft"}.pdf`);
 
       toast({
         title: "Success!",
         description: `Your ${documentType} has been downloaded.`,
-      })
+      });
     } catch (error) {
-      console.error("Error generating PDF:", error)
+      console.error("Error generating PDF:", error);
       toast({
         title: "Error",
         description: "Failed to generate PDF. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-md md:p-6 border-gray-200 border-2">
+    <div className="rounded-lg bg-white h-[max-content] p-4 shadow-md md:p-6 border-gray-200 border-2">
       <Tabs
         value={documentType}
         onValueChange={(value) => {
-          setDocumentType(value as DocumentType)
+          setDocumentType(value as DocumentType);
           setInvoiceData((prev) => ({
             ...prev,
             documentType: value as DocumentType,
-          }))
+          }));
         }}
       >
         <TabsList className="mb-6 grid w-full grid-cols-2">
@@ -182,5 +230,5 @@ export function InvoiceGenerator() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,0 +1,26 @@
+{
+  "Default Company": {
+    "name": "",
+    "address": "",
+    "city": "",
+    "state": "",
+    "zip": "",
+    "country": "",
+    "phone": "",
+    "email": "",
+    "upiId": "",
+    "paypalEmail": ""
+  },
+  "infinitylinkage": {
+    "name": "Infinity Linkage",
+    "address": "",
+    "city": "",
+    "state": "Gujarat",
+    "zip": "",
+    "country": "India",
+    "phone": "+918788383600",
+    "email": "hello@infinitylinkage.com",
+    "upiId": "infinitylinkage@oneyes",
+    "paypalEmail": "krutik@infinitylinkage.com"
+  }
+}

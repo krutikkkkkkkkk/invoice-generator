@@ -7,8 +7,6 @@ export const metadata: Metadata = {
   generator: 'Infinity Linkage',
   keywords: ['Invoice Generator', 'Quotation Generator', 'Business Tools', 'Infinity Linkage'],
   authors: [{ name: 'Infinity Linkage' }],
-  viewport: 'width=device-width, initial-scale=1.0',
-  themeColor: '#4CAF50',
 }
 
 export default function RootLayout({
