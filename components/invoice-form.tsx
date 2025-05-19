@@ -79,7 +79,16 @@ export function InvoiceForm({ documentType, invoiceData, setInvoiceData }: Invoi
   }
 
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateTaxTotal()
+    const subtotal = calculateSubtotal();
+    const taxTotal = calculateTaxTotal();
+    const previousBalance = invoiceData.balanceDue || 0;
+    return subtotal + taxTotal + previousBalance;
+  }
+
+  const calculateRemainingBalance = () => {
+    const total = calculateTotal();
+    const currentPayment = invoiceData.currentPayment || 0;
+    return Math.max(0, total - currentPayment);
   }
 
   return (
@@ -179,7 +188,42 @@ export function InvoiceForm({ documentType, invoiceData, setInvoiceData }: Invoi
                 <option value="INR">INR – Indian Rupee</option>
                 <option value="JPY">JPY – Japanese Yen</option>
                 <option value="AUD">AUD – Australian Dollar</option>
+                <option value="AED">AED – UAE Dirham</option>
               </select>
+            </div>
+
+            <div>
+              <Label htmlFor="balanceDue">Previous Balance Due</Label>
+              <Input
+                id="balanceDue"
+                type="number"
+                min="0"
+                step="0.01"
+                value={invoiceData.balanceDue || 0}
+                onChange={(e) =>
+                  setInvoiceData((prev) => ({
+                    ...prev,
+                    balanceDue: Number.parseFloat(e.target.value) || 0,
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="currentPayment">Current Payment</Label>
+              <Input
+                id="currentPayment"
+                type="number"
+                min="0"
+                step="0.01"
+                value={invoiceData.currentPayment || 0}
+                onChange={(e) =>
+                  setInvoiceData((prev) => ({
+                    ...prev,
+                    currentPayment: Number.parseFloat(e.target.value) || 0,
+                  }))
+                }
+              />
             </div>
 
             <div>
@@ -416,7 +460,10 @@ export function InvoiceForm({ documentType, invoiceData, setInvoiceData }: Invoi
               <div className="mt-6 space-y-2 text-right">
                 <div><span className="font-medium">Subtotal:</span> {invoiceData.currency} {calculateSubtotal().toFixed(2)}</div>
                 <div><span className="font-medium">Tax:</span> {invoiceData.currency} {calculateTaxTotal().toFixed(2)}</div>
-                <div className="text-lg font-bold"><span>Total:</span> {invoiceData.currency} {calculateTotal().toFixed(2)}</div>
+                <div><span className="font-medium">Previous Balance:</span> {invoiceData.currency} {(invoiceData.balanceDue || 0).toFixed(2)}</div>
+                <div><span className="font-medium">Current Payment:</span> {invoiceData.currency} {(invoiceData.currentPayment || 0).toFixed(2)}</div>
+                <div className="text-lg font-bold"><span>Total Amount:</span> {invoiceData.currency} {calculateTotal().toFixed(2)}</div>
+                <div className="text-lg font-bold text-black"><span>Remaining Balance:</span> {invoiceData.currency} {calculateRemainingBalance().toFixed(2)}</div>
               </div>
             </div>
           </CardContent>

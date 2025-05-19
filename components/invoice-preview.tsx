@@ -24,7 +24,16 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateTaxTotal();
+    const subtotal = calculateSubtotal();
+    const taxTotal = calculateTaxTotal();
+    const previousBalance = invoiceData.balanceDue || 0;
+    return subtotal + taxTotal + previousBalance;
+  };
+
+  const calculateRemainingBalance = () => {
+    const total = calculateTotal();
+    const currentPayment = invoiceData.currentPayment || 0;
+    return Math.max(0, total - currentPayment);
   };
 
   const calculateItemTotal = (quantity: number, price: number) => {
@@ -137,9 +146,21 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
             <span>Tax:</span>
             <span>{currencyFormatter.format(calculateTaxTotal())}</span>
           </div>
+          <div className="flex justify-between py-2 text-gray-600 border-t border-gray-200">
+            <span>Previous Balance:</span>
+            <span>{currencyFormatter.format(invoiceData.balanceDue || 0)}</span>
+          </div>
+          <div className="flex justify-between py-2 text-gray-600 border-t border-gray-200">
+            <span>Current Payment:</span>
+            <span>{currencyFormatter.format(invoiceData.currentPayment || 0)}</span>
+          </div>
           <div className="flex justify-between py-2 font-semibold text-xl border-t border-gray-200">
-            <span>Total:</span>
+            <span>Total Amount:</span>
             <span>{currencyFormatter.format(calculateTotal())}</span>
+          </div>
+          <div className="flex justify-between py-2 font-semibold text-lg border-t border-gray-200 text-black">
+            <span>Remaining Balance:</span>
+            <span>{currencyFormatter.format(calculateRemainingBalance())}</span>
           </div>
         </div>
       </div>

@@ -24,6 +24,8 @@ export type InvoiceData = {
   date: Date
   dueDate: Date
   currency: string
+  balanceDue: number
+  currentPayment: number
   company: {
     name: string
     address: string

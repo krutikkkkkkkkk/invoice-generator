@@ -26,6 +26,8 @@ export function InvoiceGenerator({ companyName }: InvoiceGeneratorProps) {
     date: new Date(),
     dueDate: new Date(),
     currency: "USD",
+    balanceDue: 0,
+    currentPayment: 0,
     company: {
       name: "",
       address: "",
